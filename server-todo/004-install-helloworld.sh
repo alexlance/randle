@@ -1,4 +1,5 @@
-#!/bin/bash -e
+#!/bin/bash
+set -e
 
 # checkout the helloworld application into apache's DocumentRoot
 rm -rf /var/www/html || true

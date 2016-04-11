@@ -1,4 +1,5 @@
-#!/bin/bash -e
+#!/bin/bash
+set -e
 
 # setup a quick apache config
 rm -f /etc/apache2/sites-enabled/*
