@@ -15,7 +15,7 @@ def get_options():
     """ Setup the command line arguments. """
     parser = argparse.ArgumentParser(description='')
     parser.add_argument('PATH_TO_DEPLOY', type=str, nargs='?', default=".",
-                        help='The directory containing the deploy folders (default: pwd)')
+                        help='The directory containing server-todo and server-done folders (default: pwd)')
     parser.add_argument('-a', dest='ipaddr', action='append', required=True,
                         help='Server to be provisioned (flag can be used multiple times)')
     parser.add_argument('-u', dest='username', required=True,
@@ -29,9 +29,9 @@ def get_options():
     parser.add_argument('-v', dest='verbose', action="store_true",
                         help='Show verbose output from provisioning')
     parser.add_argument('-q', dest='quiet', action="store_true",
-                        help='Show much less output')
+                        help='Show much less output, only errors')
     parser.add_argument('-f', dest='force', action="store_true",
-                        help='Force provisioning regardless of tests')
+                        help='Force provisioning regardless of what server-done/ says')
     return parser.parse_args()
 
 
