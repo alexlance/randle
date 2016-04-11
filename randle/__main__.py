@@ -28,10 +28,14 @@ def get_options():
                         help='Re-verify successful provisioning using server-done/ scripts')
     parser.add_argument('-v', dest='verbose', action="store_true",
                         help='Show verbose output from provisioning')
+    parser.add_argument('-q', dest='quiet', action="store_true",
+                        help='Show much less output')
+    parser.add_argument('-f', dest='force', action="store_true",
+                        help='Force provisioning regardless of tests')
     return parser.parse_args()
 
 
-def check_config(p, path):
+def check_config(p, path, options):
     """ Ensure that the server-todo and the server-done directories have similarly named files in them. """
     for d in ['server-todo', 'server-done']:
         if not os.path.isdir(os.path.join(path, d)):
@@ -39,7 +43,7 @@ def check_config(p, path):
             sys.exit(1)
 
     for f in sorted(os.listdir(os.path.join(path, 'server-todo'))):
-        if not os.path.isfile(os.path.join(path, 'server-done', f)):
+        if not os.path.isfile(os.path.join(path, 'server-done', f)) and not options.force:
             p.err('File not found: {}'.format(os.path.join(path, 'server-done', f)))
             sys.exit(1)
 
@@ -61,7 +65,7 @@ def provision_server(p, server, options, auth):
     tasks = sorted(os.listdir(os.path.join(options.PATH_TO_DEPLOY, 'server-todo')))
     for t in tasks:
         done_exit, done_output, done_errors = s.execute_task(os.path.join(options.PATH_TO_DEPLOY, 'server-done', t))
-        if done_exit:
+        if done_exit and not options.force:
             p.warn('   {:16s} {:30s} {}'.format(s.host, t, p.orange('skipped')))
         else:
             todo_exit, todo_output, todo_errors = s.execute_task(os.path.join(options.PATH_TO_DEPLOY, 'server-todo', t))
@@ -85,9 +89,9 @@ def provision_server(p, server, options, auth):
 
 def main():
     """ Run a bunch of scripts on a bunch of servers. """
-    p = Message()
     options = get_options()
-    check_config(p, options.PATH_TO_DEPLOY)
+    p = Message(options.quiet)
+    check_config(p, options.PATH_TO_DEPLOY, options)
 
     auth = Auth()
     auth.set_username(options.username)
