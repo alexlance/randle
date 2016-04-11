@@ -1,29 +1,31 @@
 # Randle - server configuration tool
 
-*(named after Randle McMurphy - because this approach is a teeny bit braindead)*
+*(named after Randle McMurphy - because this approach miight be a teeny bit braindead)*
 
 
 ### Synopsis
 
-Given a pool of servers, and a bunch of shell scripts that you want to run on them,
-randle opens ssh connections to each server and runs the scripts.
+Given a pool of servers, and a bunch of shell scripts that you want to run on
+them, randle opens ssh connections to each server and runs the scripts.
 
 
 ### Features
 
-* Multiple servers can be provisioned at a time.
+* Multiple servers can be provisioned at a time
 
 * Un-opinionated provisioning - they're your provisioning scripts
+
+* Idempotent, only performs the provisioning tasks that need to be done
 
 
 ### Directory layout
 
-The folders *server-todo* and *server-done*, contain scripts that execute
-**on the server** you are provisioning.
+The folders *server-todo* and *server-done*, contain scripts that execute **on
+the server** you are provisioning.
 
 *server-todo* actually does stuff on the server, and *server-done* should
-contain scripts to determine *if* that aforementioned stuff has been done.
-All scripts must exit non-zero on failure.
+contain scripts to determine *if* that aforementioned stuff has been done. All
+scripts must exit non-zero on failure.
 
 > Eg:  
 > *server-todo/004-packages.sh* (installs some packages)
@@ -35,24 +37,30 @@ multiple times and no harm done.
 
 ### Quick start
 
-First create a folder structure somewhere:
+First create a folder structure somewhere (I've just bundled them in with this
+repo so that you the Slack person, can just run the thing)
 
 > mkdir -p ./randle_dirs/{server-todo,server-done}
 
-And populate the server-todo folder with scripts that you'd like to run on the
+The contents of both of those directories should look very similar at all times.
+If one of those folders has four files in it, then the other one should have four
+files with identical names (but differing contents).
+
+Populate the *server-todo* folder with scripts that you'd like to run on the
 servers you are provisioning. The scripts will be executed in regular directory
-order. So it makes sense to name them eg: *001-do-stuff.sh, 002-do-other-things.sh*.
+order. So it makes sense to name them eg: *001-install-packages.sh,
+002-configure-packages.sh*.
 
 Eg: a command like this will connect to three servers and provision them:
 
-> python -m randle -u USERNAME -p PASSWORD -a 192.168.1.7 -a 192.168.1.8 -a 192.168.9 ./randle_dirs/
+> python -m randle -u USERNAME -p PASSWORD -a 192.168.1.7 -a 192.168.1.8 -a 192.168.1.9 ./randle_dirs/
 
-(note if you run *python setup.py install* it will build a standalone *randle* binary and plonk
-it in your path, so you won't need to invoke it with python -m randle anymore)
+(note if you run *python setup.py install* it will build a standalone *randle*
+binary and plonk it in your path, so you won't need to invoke it with *python -m
+randle* anymore)
 
-Each script inside *server-todo* should have a corresponding sibling script in *server-done*
-with the same filename. The scripts in server-done can just exit 0 if they're not needed. Or exit 1
-if you want the sibling to *always* execute.
+The scripts in server-done can just *exit 0* if you don't care about checking.
+Or *exit 1* if you want the *server-todo* sibling to *always* execute.
 
 
 ### Ideas for the future
@@ -73,7 +81,9 @@ if you want the sibling to *always* execute.
   return the IP address to the main randle process in some fashion, so that the
   new server can be provisioned (for eg red-black deploys)
 
-* Add support for privilege escalation (sudo etc)
+* Add support for privilege escalation (sudo etc - although maybe that's
+  outside scope)
+
 
 ### Dependencies
 
