@@ -1,5 +1,4 @@
 import paramiko
-import time
 import argparse
 import sys
 import os
@@ -21,9 +20,9 @@ class Auth():
 
     def toDict(self):
         if self.authType == "password":
-            return { 'username': self.username, 'password': self.password }
+            return {'username': self.username, 'password': self.password}
         elif self.authType == "privateKey":
-            return { 'username': self.username, 'key_filename': self.keyFile }
+            return {'username': self.username, 'key_filename': self.keyFile}
 
 
 class Server():
@@ -40,12 +39,12 @@ class Server():
             self.ssh = paramiko.SSHClient()
             self.ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             credentials = self.auth.toDict()
-            credentials.update({ 'hostname': self.host })
+            credentials.update({'hostname': self.host})
             self.ssh.connect(**credentials)
             self.connStatus = self.CONN_OPEN
         except paramiko.AuthenticationException:
             self.connStatus = self.CONN_FAILED
-        except e:
+        except Exception, e:
             raise e
 
     def disconnect(self):
@@ -59,7 +58,7 @@ class Server():
         output = ''
         errors = ''
         receiving = True
-        while receiving:  
+        while receiving:
             if chan.recv_ready():
                 output += chan.recv(4096).decode('ascii')
             if chan.recv_stderr_ready():
@@ -71,7 +70,6 @@ class Server():
             return True, output, errors
         else:
             return False, output, errors
-
 
     def provision(self, p, options):
         self.connect()
@@ -96,7 +94,8 @@ class Server():
                 if options.check:
                     done_exit, done_output, done_errors = self.execute_task(os.path.join(options.PATH_TO_DEPLOY, 'server-done', t))
                     if not done_exit:
-                        p.warn('   {:16s} {:22s} warning: {} does not indicate success.'.format(self.host, t, os.path.join(options.PATH_TO_DEPLOY, 'server-done', t)))
+                        p.warn('   {:16s} {:22s} warning: {} does not indicate success.'
+                               .format(self.host, t, os.path.join(options.PATH_TO_DEPLOY, 'server-done', t)))
 
                 if options.verbose:
                     if todo_output:
@@ -105,23 +104,22 @@ class Server():
         self.disconnect()
 
 
-
 def get_options():
     parser = argparse.ArgumentParser(description='')
     parser.add_argument('PATH_TO_DEPLOY', type=str, nargs='?', default=".",
-        help='The directory containing the deploy folders (default: pwd)')
+                        help='The directory containing the deploy folders (default: pwd)')
     parser.add_argument('-a', dest='ipaddr', action='append', required=True,
-        help='Server to be provisioned (flag can be used multiple times)')
+                        help='Server to be provisioned (flag can be used multiple times)')
     parser.add_argument('-u', dest='username', required=True,
-        help='ssh login username')
+                        help='ssh login username')
     parser.add_argument('-p', dest='password', required=True,
-        help='ssh login password')
+                        help='ssh login password')
     parser.add_argument('-k', dest='keyfile',
-        help='ssh login private key file (not implemented yet)')
+                        help='ssh login private key file (not implemented yet)')
     parser.add_argument('--check', action="store_true",
-        help='Re-verify successful provisioning using server-done/ scripts')
+                        help='Re-verify successful provisioning using server-done/ scripts')
     parser.add_argument('-v', dest='verbose', action="store_true",
-        help='Show verbose output from provisioning')
+                        help='Show verbose output from provisioning')
     return parser.parse_args()
 
 
@@ -144,7 +142,7 @@ def check_config(p, path):
 def provision_server(p, server, options, auth):
     s = Server(server, auth)
     s.provision(p, options)
-    
+
 
 def main():
     p = Message()
@@ -167,5 +165,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-  
-
