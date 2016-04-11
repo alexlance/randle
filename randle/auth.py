@@ -1,3 +1,5 @@
+""" Authentication wrapper for ssh. """
+
 class Auth(object):
     """ This gives us a flexible method of handling ssh auth (as new auth methods are implemented). """
 

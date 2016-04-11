@@ -1,3 +1,5 @@
+""" For communicating with servers. """
+
 import paramiko
 import time
 
