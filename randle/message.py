@@ -5,18 +5,12 @@ import sys
 class Message(object):
     """ A class to funnel all user messages through. """
 
-    def __init__(self):
-        self.quiet = False
-        self.debug = False
+    def __init__(self, quiet=False, debug=False):
+        self.quiet = quiet
+        self.debug = debug
 
     def msg(self, s):
         """ Print a message to the screen (stdout). """
-        if not self.quiet:
-            print str(s)
-            sys.stdout.flush()
-
-    def yay(self, s):
-        """ Print a success message to the screen (stdout). """
         if not self.quiet:
             print str(s)
             sys.stdout.flush()
