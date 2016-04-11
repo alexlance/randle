@@ -3,6 +3,7 @@ import time
 import argparse
 import sys
 import os
+from multiprocessing import Process
 from message import Message
 
 
@@ -72,6 +73,39 @@ class Server():
             return False, output, errors
 
 
+    def provision(self, p, options):
+        self.connect()
+        if self.connStatus == self.CONN_OPEN:
+            p.msg(' {} {:16s} Connected'.format(p.green('*'), self.host))
+        elif self.connStatus == self.CONN_FAILED:
+            p.die(' {} {:16s} Authentication failed'.format(p.red('*'), self.host))
+
+        tasks = sorted(os.listdir(os.path.join(options.PATH_TO_DEPLOY, 'server-todo')))
+        for t in tasks:
+            done_exit, done_output, done_errors = self.execute_task(os.path.join(options.PATH_TO_DEPLOY, 'server-done', t))
+            if done_exit:
+                p.warn('   {:16s} {:22s} {}'.format(self.host, t, p.orange('skipped')))
+
+            else:
+                todo_exit, todo_output, todo_errors = self.execute_task(os.path.join(options.PATH_TO_DEPLOY, 'server-todo', t))
+                if todo_exit:
+                    p.msg('   {:16s} {:22s} {}'.format(self.host, t, p.green('done')))
+                else:
+                    p.err('   {:16s} {:22s} {}'.format(self.host, t, p.red('error: '+str(todo_errors).rstrip())))
+
+                if options.check:
+                    done_exit, done_output, done_errors = self.execute_task(os.path.join(options.PATH_TO_DEPLOY, 'server-done', t))
+                    if not done_exit:
+                        p.warn('   {:16s} {:22s} warning: {} does not indicate success.'.format(self.host, t, os.path.join(options.PATH_TO_DEPLOY, 'server-done', t)))
+
+                if options.verbose:
+                    if todo_output:
+                        p.msg('   {}: {:22s} output: {}'.format(self.host, t, str(todo_output).rstrip()))
+
+        self.disconnect()
+
+
+
 def get_options():
     parser = argparse.ArgumentParser(description='')
     parser.add_argument('PATH_TO_DEPLOY', type=str, nargs='?', default=".",
@@ -84,6 +118,10 @@ def get_options():
         help='ssh login password')
     parser.add_argument('-k', dest='keyfile',
         help='ssh login private key file (not implemented yet)')
+    parser.add_argument('--check', action="store_true",
+        help='Re-verify successful provisioning using server-done/ scripts')
+    parser.add_argument('-v', dest='verbose', action="store_true",
+        help='Show verbose output from provisioning')
     return parser.parse_args()
 
 
@@ -103,43 +141,31 @@ def check_config(p, path):
             p.err('File not found: {}'.format(os.path.join(path, 'server-todo', f)))
 
 
+def provision_server(p, server, options, auth):
+    s = Server(server, auth)
+    s.provision(p, options)
     
 
 def main():
-  p = Message()
-  options = get_options()
-  check_config(p, options.PATH_TO_DEPLOY) 
+    p = Message()
+    options = get_options()
+    check_config(p, options.PATH_TO_DEPLOY)
 
-  auth = Auth()
-  auth.setUsername(options.username)
-  auth.setPassword(options.password)
+    auth = Auth()
+    auth.setUsername(options.username)
+    auth.setPassword(options.password)
 
-  for server in options.ipaddr:
-      s = Server(server, auth)
-      s.connect()
-      if s.connStatus == s.CONN_OPEN:
-          p.msg('{}: Connected'.format(s.host))
-      elif s.connStatus == s.CONN_FAILED:
-          p.die('{}: Authentication failed'.format(s.host))
+    processes = []
+    for server in options.ipaddr:
+        proc = Process(target=provision_server, args=(p, server, options, auth))
+        proc.start()
+        processes.append(proc)
 
-      tasks = sorted(os.listdir(os.path.join(options.PATH_TO_DEPLOY, 'server-done')))
-      for t in tasks:
-          done_exit, done_output, done_errors = s.execute_task(os.path.join(options.PATH_TO_DEPLOY, 'server-done', t))
-          if done_exit:
-              p.warn('{}: Skipping {}'.format(s.host, t))
-          else:
-              p.halfmsg('   {}: Executing {} ...'.format(s.host, os.path.join(options.PATH_TO_DEPLOY, 'server-todo', t)))
-              todo_exit, todo_output, todo_errors = s.execute_task(os.path.join(options.PATH_TO_DEPLOY, 'server-todo', t))
-              if todo_exit:
-                  p.yay('success'.format(s.host, t))
-              else:
-                  p.err('FAILED'.format(s.host, t))
-                  if todo_errors:
-                      p.err(todo_errors)
+    for proc in processes:
+        proc.join()
 
-      s.disconnect()
 
-   
-main()
+if __name__ == "__main__":
+    main()
   
 
