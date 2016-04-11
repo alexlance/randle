@@ -62,23 +62,23 @@ def provision_server(p, server, options, auth):
     for t in tasks:
         done_exit, done_output, done_errors = s.execute_task(os.path.join(options.PATH_TO_DEPLOY, 'server-done', t))
         if done_exit:
-            p.warn('   {:16s} {:22s} {}'.format(s.host, t, p.orange('skipped')))
+            p.warn('   {:16s} {:30s} {}'.format(s.host, t, p.orange('skipped')))
         else:
             todo_exit, todo_output, todo_errors = s.execute_task(os.path.join(options.PATH_TO_DEPLOY, 'server-todo', t))
             if todo_exit:
-                p.msg('   {:16s} {:22s} {}'.format(s.host, t, p.green('done')))
+                p.msg('   {:16s} {:30s} {}'.format(s.host, t, p.green('done')))
             else:
-                p.err('   {:16s} {:22s} {}'.format(s.host, t, p.red('error: '+str(todo_errors).rstrip())))
+                p.err('   {:16s} {:30s} {}'.format(s.host, t, p.red('error: '+str(todo_errors).rstrip())))
 
             if options.check:
                 done_exit, done_output, done_errors = s.execute_task(os.path.join(options.PATH_TO_DEPLOY, 'server-done', t))
                 if not done_exit:
-                    p.warn('   {:16s} {:22s} warning: {} does not indicate success.'
+                    p.warn('   {:16s} {:30s} warning: {} does not indicate success.'
                            .format(s.host, t, os.path.join(options.PATH_TO_DEPLOY, 'server-done', t)))
 
             if options.verbose:
                 if todo_output:
-                    p.msg('   {}: {:22s} output: {}'.format(s.host, t, str(todo_output).rstrip()))
+                    p.msg('   {}: {:30s} output: {}'.format(s.host, t, str(todo_output).rstrip()))
 
     s.disconnect()
 
