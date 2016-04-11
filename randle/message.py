@@ -1,6 +1,5 @@
 import sys
 
-
 class Message():
     quiet = False
 

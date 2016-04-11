@@ -1,117 +1,16 @@
-import paramiko
+""" randle, server configuration tool """
+
 import argparse
 import sys
 import os
-import time
 from multiprocessing import Process
-from message import Message
-
-
-class Auth():
-    def setUsername(self, username):
-        self.username = username
-
-    def setPassword(self, password):
-        self.password = password
-        self.authType = 'password'
-
-    def setPrivateKey(self, keyFile, passphrase):
-        self.keyFile = keyFile
-        self.authType = 'privateKey'
-
-    def toDict(self):
-        if self.authType == "password":
-            return {'username': self.username, 'password': self.password}
-        elif self.authType == "privateKey":
-            return {'username': self.username, 'key_filename': self.keyFile}
-
-
-class Server():
-    CONN_CLOSED, CONN_OPEN, CONN_FAILED = 1, 2, 3
-    loopcounter = 0
-
-    def __init__(self, host, auth):
-        self.host = host
-        self.auth = auth
-        self.connStatus = self.CONN_CLOSED
-        self.ssh = None
-
-    def connect(self):
-        try:
-            self.ssh = paramiko.SSHClient()
-            self.ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            credentials = self.auth.toDict()
-            credentials.update({'hostname': self.host})
-            self.ssh.connect(**credentials)
-            self.connStatus = self.CONN_OPEN
-        except paramiko.AuthenticationException:
-            self.connStatus = self.CONN_FAILED
-        except paramiko.ssh_exception.SSHException:
-            if self.loopcounter < 3:
-                time.sleep(2)
-                self.loopcounter += 1
-                self.connect()
-        except Exception, e:
-            raise e
-
-    def disconnect(self):
-        if self.connStatus == self.CONN_OPEN:
-            self.ssh.close()
-            self.connStatus = self.CONN_CLOSED
-
-    def execute_task(self, filename):
-        chan = self.ssh.get_transport().open_session()
-        chan.exec_command(open(filename).read())
-        output = ''
-        errors = ''
-        receiving = True
-        while receiving:
-            if chan.recv_ready():
-                output += chan.recv(4096).decode('ascii')
-            if chan.recv_stderr_ready():
-                errors += chan.recv_stderr(4096).decode('ascii')
-            if chan.exit_status_ready():
-                receiving = False
-
-        if chan.recv_exit_status() == 0:
-            return True, output, errors
-        else:
-            return False, output, errors
-
-    def provision(self, p, options):
-        self.connect()
-        if self.connStatus == self.CONN_OPEN:
-            p.msg(' {} {:16s} Connected'.format(p.green('*'), self.host))
-        elif self.connStatus == self.CONN_FAILED:
-            p.die(' {} {:16s} Authentication failed'.format(p.red('*'), self.host))
-
-        tasks = sorted(os.listdir(os.path.join(options.PATH_TO_DEPLOY, 'server-todo')))
-        for t in tasks:
-            done_exit, done_output, done_errors = self.execute_task(os.path.join(options.PATH_TO_DEPLOY, 'server-done', t))
-            if done_exit:
-                p.warn('   {:16s} {:22s} {}'.format(self.host, t, p.orange('skipped')))
-
-            else:
-                todo_exit, todo_output, todo_errors = self.execute_task(os.path.join(options.PATH_TO_DEPLOY, 'server-todo', t))
-                if todo_exit:
-                    p.msg('   {:16s} {:22s} {}'.format(self.host, t, p.green('done')))
-                else:
-                    p.err('   {:16s} {:22s} {}'.format(self.host, t, p.red('error: '+str(todo_errors).rstrip())))
-
-                if options.check:
-                    done_exit, done_output, done_errors = self.execute_task(os.path.join(options.PATH_TO_DEPLOY, 'server-done', t))
-                    if not done_exit:
-                        p.warn('   {:16s} {:22s} warning: {} does not indicate success.'
-                               .format(self.host, t, os.path.join(options.PATH_TO_DEPLOY, 'server-done', t)))
-
-                if options.verbose:
-                    if todo_output:
-                        p.msg('   {}: {:22s} output: {}'.format(self.host, t, str(todo_output).rstrip()))
-
-        self.disconnect()
+from randle.message import Message
+from randle.auth import Auth
+from randle.server import Server
 
 
 def get_options():
+    """ Setup the command line arguments. """
     parser = argparse.ArgumentParser(description='')
     parser.add_argument('PATH_TO_DEPLOY', type=str, nargs='?', default=".",
                         help='The directory containing the deploy folders (default: pwd)')
@@ -131,6 +30,7 @@ def get_options():
 
 
 def check_config(p, path):
+    """ Ensure that the server-todo and the server-done directories have similarly named files in them. """
     for d in ['server-todo', 'server-done']:
         if not os.path.isdir(os.path.join(path, d)):
             p.err('Missing directory: {}'.format(d))
@@ -147,18 +47,48 @@ def check_config(p, path):
 
 
 def provision_server(p, server, options, auth):
+    """ Connect to a server and run scripts on it to provision it. """
     s = Server(server, auth)
-    s.provision(p, options)
+    s.connect()
+    if s.conn_status == s.CONN_OPEN:
+        p.msg(' {} {:16s} Connected'.format(p.green('*'), s.host))
+    elif s.conn_status == s.CONN_FAILED:
+        p.die(' {} {:16s} Authentication failed'.format(p.red('*'), s.host))
+
+    tasks = sorted(os.listdir(os.path.join(options.PATH_TO_DEPLOY, 'server-todo')))
+    for t in tasks:
+        done_exit, done_output, done_errors = s.execute_task(os.path.join(options.PATH_TO_DEPLOY, 'server-done', t))
+        if done_exit:
+            p.warn('   {:16s} {:22s} {}'.format(s.host, t, p.orange('skipped')))
+        else:
+            todo_exit, todo_output, todo_errors = s.execute_task(os.path.join(options.PATH_TO_DEPLOY, 'server-todo', t))
+            if todo_exit:
+                p.msg('   {:16s} {:22s} {}'.format(s.host, t, p.green('done')))
+            else:
+                p.err('   {:16s} {:22s} {}'.format(s.host, t, p.red('error: '+str(todo_errors).rstrip())))
+
+            if options.check:
+                done_exit, done_output, done_errors = s.execute_task(os.path.join(options.PATH_TO_DEPLOY, 'server-done', t))
+                if not done_exit:
+                    p.warn('   {:16s} {:22s} warning: {} does not indicate success.'
+                           .format(s.host, t, os.path.join(options.PATH_TO_DEPLOY, 'server-done', t)))
+
+            if options.verbose:
+                if todo_output:
+                    p.msg('   {}: {:22s} output: {}'.format(s.host, t, str(todo_output).rstrip()))
+
+    s.disconnect()
 
 
 def main():
+    """ Run a bunch of scripts on a bunch of servers. """
     p = Message()
     options = get_options()
     check_config(p, options.PATH_TO_DEPLOY)
 
     auth = Auth()
-    auth.setUsername(options.username)
-    auth.setPassword(options.password)
+    auth.set_username(options.username)
+    auth.set_password(options.password)
 
     processes = []
     for server in options.ipaddr:
