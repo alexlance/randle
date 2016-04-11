@@ -13,27 +13,18 @@ randle opens ssh connections to each server and runs the scripts.
 
 * Multiple servers can be provisioned at a time.
 
-* Support for pre-hook operations and post-hook operations (for deploy
-  strategies)
 
 * Un-opinionated provisioning - they're your provisioning scripts
 
 
 ### Directory layout
 
-Scripts that are in the *pre-hook* and *post-hook* directories are run
-**locally** on the machine that you have executed Randle on. 
-
-> Eg:
-> a script in the *pre-hook* folder might take a server instance out of the
-> load balancer before provisioning. And a script in *post-hook* could perform
-> tests on the newly provisioned instance (to ensure it is healthy) and if
-> healthy, place it back under the load balancer.
-
 The folders *server-todo* and *server-done*, contain scripts that execute
-**on the server** you are provisioning. *server-todo* actually does stuff
-on the server, and *server-done* should contain scripts to determine *if*
-that stuff has been done. All scripts must exit non-zero on failure.
+**on the server** you are provisioning.
+
+*server-todo* actually does stuff on the server, and *server-done* should
+contain scripts to determine *if* that aforementioned stuff has been done.
+All scripts must exit non-zero on failure.
 
 > Eg:  
 > *server-todo/004-packages.sh* (installs some packages)
@@ -47,7 +38,7 @@ multiple times and no harm done.
 
 First create a folder structure somewhere:
 
-> mkdir -p ./randle_dirs/{pre-hook,post-hook,server-todo,server-done}
+> mkdir -p ./randle_dirs/{server-todo,server-done}
 
 And populate the server-todo folder with scripts that you'd like to run on the
 servers you are provisioning. The scripts will be executed in regular directory
@@ -68,7 +59,9 @@ if you want the sibling to *always* execute.
 * Should be able to interrogate a load balancer to dynamically determine the
   instances beneath it that require provisioning?
 
-* Built-in deployment strategies, rolling, blue-green, red-black, canary deployment?
+* Support for pre-hook operations and post-hook operations (for deploy strategies)
+
+* Or... built-in deployment strategies, rolling, blue-green, red-black, canary deployment?
 
 * Scripts are not OS agnostic. Ie, apt vs yum etc. But I'm ok with that. The OS
   agnostic abstraction can be pretty leaky anyway.

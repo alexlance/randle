@@ -124,7 +124,7 @@ def get_options():
 
 
 def check_config(p, path):
-    for d in ['pre-hook', 'post-hook', 'server-todo', 'server-done']:
+    for d in ['server-todo', 'server-done']:
         if not os.path.isdir(os.path.join(path, d)):
             p.err('Missing directory: {}'.format(d))
             sys.exit(1)
