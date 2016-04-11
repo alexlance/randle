@@ -72,6 +72,7 @@ if you want the sibling to *always* execute.
   return the IP address to the main randle process in some fashion, so that the
   new server can be provisioned (for eg red-black deploys)
 
+* Add support for privilege escalation (sudo etc)
 
 ### Dependencies
 
