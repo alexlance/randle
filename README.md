@@ -43,10 +43,12 @@ And populate the server-todo folder with scripts that you'd like to run on the
 servers you are provisioning. The scripts will be executed in regular directory
 order. So it makes sense to name them eg: *001-do-stuff.sh, 002-do-other-things.sh*.
 
-
 Eg: a command like this will connect to three servers and provision them:
 
-> ./randle.py -u USERNAME -p PASSWORD -a 192.168.1.7 -a 192.168.1.8 -a 192.168.9 ./randle_dirs/
+> python -m randle -u USERNAME -p PASSWORD -a 192.168.1.7 -a 192.168.1.8 -a 192.168.9 ./randle_dirs/
+
+(note if you run *python setup.py install* it will build a standalone *randle* binary and plonk
+it in your path, so you won't need to invoke it with python -m randle anymore)
 
 Each script inside *server-todo* should have a corresponding sibling script in *server-done*
 with the same filename. The scripts in server-done can just exit 0 if they're not needed. Or exit 1
