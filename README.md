@@ -1,6 +1,6 @@
 # Randle - server configuration tool
 
-*(named after Randle McMurphy - because this approach miight be a teeny bit braindead)*
+*(named after Randle McMurphy - because this approach miight be slightly deranged)*
 
 
 ### Synopsis
@@ -11,7 +11,7 @@ them, randle opens ssh connections to each server and runs the scripts.
 
 ### Features
 
-* Multiple servers can be provisioned at a time
+* Multiple servers can be provisioned simultaneously
 
 * Un-opinionated provisioning - they're your provisioning scripts
 
@@ -23,12 +23,12 @@ them, randle opens ssh connections to each server and runs the scripts.
 The folders *server-todo* and *server-done*, contain scripts that execute **on
 the server** you are provisioning.
 
-*server-todo* actually does stuff on the server, and *server-done* should
-contain scripts to determine *if* that aforementioned stuff has been done. All
-scripts must exit non-zero on failure.
+*server-todo* contains scripts that actually do stuff on the server, and
+*server-done* should contain scripts to determine if that aforementioned stuff
+has been done.
 
 > Eg:  
-> *server-todo/004-packages.sh* (installs some packages)
+> *server-todo/004-packages.sh* (installs some packages)  
 > *server-done/004-packages.sh* (check whether those packages have been installed)
 
 This is meant to provide a sort of low-tech idempotency. Ie you can run it
@@ -55,7 +55,7 @@ Eg: a command like this will connect to three servers and provision them:
 
 > python -m randle -u USERNAME -p PASSWORD -a 192.168.1.7 -a 192.168.1.8 -a 192.168.1.9 ./randle_dirs/
 
-(note if you run *python setup.py install* it will build a standalone *randle*
+(note if you run *python setup.py install* it will build a standalone randle
 binary and plonk it in your path, so you won't need to invoke it with *python -m
 randle* anymore)
 
@@ -66,7 +66,7 @@ Or *exit 1* if you want the *server-todo* sibling to *always* execute.
 ### Ideas for the future
 
 * Should be able to interrogate a load balancer to dynamically determine the
-  instances beneath it that require provisioning?
+  instances beneath it that require provisioning
 
 * Support for pre-hook operations and post-hook operations (for deploy strategies)
 
