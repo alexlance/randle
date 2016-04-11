@@ -2,6 +2,7 @@ import paramiko
 import argparse
 import sys
 import os
+import time
 from multiprocessing import Process
 from message import Message
 
@@ -27,6 +28,7 @@ class Auth():
 
 class Server():
     CONN_CLOSED, CONN_OPEN, CONN_FAILED = 1, 2, 3
+    loopcounter = 0
 
     def __init__(self, host, auth):
         self.host = host
@@ -44,6 +46,11 @@ class Server():
             self.connStatus = self.CONN_OPEN
         except paramiko.AuthenticationException:
             self.connStatus = self.CONN_FAILED
+        except paramiko.ssh_exception.SSHException:
+            if self.loopcounter < 3:
+                time.sleep(2)
+                self.loopcounter += 1
+                self.connect()
         except Exception, e:
             raise e
 
