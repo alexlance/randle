@@ -41,11 +41,12 @@ def check_config(p, path):
     for f in sorted(os.listdir(os.path.join(path, 'server-todo'))):
         if not os.path.isfile(os.path.join(path, 'server-done', f)):
             p.err('File not found: {}'.format(os.path.join(path, 'server-done', f)))
-            p.err('  (this means {} will execute on every run)'.format(os.path.join(path, 'server-todo', f)))
+            sys.exit(1)
 
     for f in sorted(os.listdir(os.path.join(path, 'server-done'))):
         if not os.path.isfile(os.path.join(path, 'server-todo', f)):
             p.err('File not found: {}'.format(os.path.join(path, 'server-todo', f)))
+            sys.exit(1)
 
 
 def provision_server(p, server, options, auth):
