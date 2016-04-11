@@ -13,7 +13,6 @@ randle opens ssh connections to each server and runs the scripts.
 
 * Multiple servers can be provisioned at a time.
 
-
 * Un-opinionated provisioning - they're your provisioning scripts
 
 
@@ -47,7 +46,7 @@ order. So it makes sense to name them eg: *001-do-stuff.sh, 002-do-other-things.
 
 Eg: a command like this will connect to three servers and provision them:
 
-> main.py -u USERNAME -p PASSWORD -a 192.168.1.7 -a 192.168.1.8 -a 192.168.9 ./randle_dirs/
+> ./randle.py -u USERNAME -p PASSWORD -a 192.168.1.7 -a 192.168.1.8 -a 192.168.9 ./randle_dirs/
 
 Each script inside *server-todo* should have a corresponding sibling script in *server-done*
 with the same filename. The scripts in server-done can just exit 0 if they're not needed. Or exit 1
