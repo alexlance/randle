@@ -87,5 +87,7 @@ Or *exit 1* if you want the *server-todo* sibling to *always* execute.
 
 ### Dependencies
 
-* needs python paramiko
+* Python 2.7.9
+
+* Python Paramiko (I'm using python-paramiko/stable,now 1.15.1-1 on debian:jessie)
 
