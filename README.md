@@ -5,8 +5,8 @@
 
 ### Synopsis
 
-Given a pool of servers, and a bunch of shell scripts that you want to run on
-them, randle opens ssh connections to each server and runs the scripts.
+Given a pool of servers, and a bunch of provisioning shell scripts, randle
+opens an ssh connection to each server and runs the scripts.
 
 
 ### Features
@@ -18,62 +18,68 @@ them, randle opens ssh connections to each server and runs the scripts.
 * Idempotent, only performs the provisioning tasks that need to be done
 
 
-### Directory layout
-
-The folders *server-todo* and *server-done*, contain scripts that execute **on
-the server** you are provisioning.
-
-*server-todo* contains scripts that actually do stuff on the server, and
-*server-done* should contain scripts to determine if that aforementioned stuff
-has been done.
-
-> Eg:  
-> *server-todo/004-packages.sh* (installs some packages)  
-> *server-done/004-packages.sh* (check whether those packages have been installed)
-
-This is meant to provide a sort of low-tech idempotency. Ie you can run it
-multiple times and no harm done.
-
-
 ### Quick start
 
-First create a folder structure somewhere (I've just bundled them in with this
-repo so that you the Slack person, can just run the thing)
+Randle looks for scripts in two directories: *server-todo* and *server-done*.
+The latter contains scripts, that check that the former's scripts have executed.
 
-> mkdir -p ./randle_dirs/{server-todo,server-done}
+A command like this will connect to three servers and provision them with the
+scripts in the *server-todo* directory:
 
-The contents of both of those directories should look very similar at all times.
-If one of those folders has four files in it, then the other one should have four
-files with identical names (but differing contents).
+> python -m randle -u USERNAME -p PASSWORD -a 192.168.1.7 -a 192.168.1.8 -a 192.168.1.9
 
-Populate the *server-todo* folder with scripts that you'd like to run on the
-servers you are provisioning. The scripts will be executed in regular directory
-order. So it makes sense to name them eg: *001-install-packages.sh,
-002-configure-packages.sh*.
+And take a quick look at the options:
 
-Eg: a command like this will connect to three servers and provision them:
+> python -m randle --help
 
-> python -m randle -u USERNAME -p PASSWORD -a 192.168.1.7 -a 192.168.1.8 -a 192.168.1.9 ./randle_dirs/
+Note: if you run *python setup.py install --user* it will build a standalone
+randle binary in ~/.local/bin/.
 
-(note if you run *python setup.py install* it will build a standalone randle
-binary and plonk it in your path, so you won't need to invoke it with *python -m
-randle* anymore)
 
-The scripts in server-done can just *exit 0* if you don't care about checking.
-Or *exit 1* if you want the *server-todo* sibling to *always* execute.
+### More info...
+
+The folders *server-todo* and *server-done*, contain scripts that execute on
+the server you are provisioning. There must be a parity between the files in
+these two directories.
+
+*server-todo* contains scripts that actually do tasks on the server, and
+*server-done* should contain scripts to determine if those tasks have been
+done.
+
+This is meant to provide a sort of low-tech idempotency. Ie you can run randle
+multiple times and no harm done. Eg:
+
+> *server-todo/004-update-config.sh* (performs a tasks)
+> #!/bin/bash
+> set -e
+> echo "some config option" > /etc/config.something
+
+> *server-done/004-update-config.sh* (check that the task was performed)
+> #!/bin/bash
+> set -e
+> # grep exits 1 if pattern not found
+> grep "some config option" /etc/config.something 
+
+It is strongly recommended that every script be run using *set -e* so that any
+failures anywhere in the script will cause the script to *exit 1* immediately.
+
+The scripts in *server-done* must *exit 1* if you want the sibling task to
+execute.
 
 
 ### Ideas for the future
 
-* Should be able to interrogate a load balancer to dynamically determine the
-  instances beneath it that require provisioning
+* Interrogate a load balancer to dynamically determine the instances beneath it
+  that require provisioning
 
-* Support for pre-hook operations and post-hook operations (for deploy strategies)
+* Support for pre-hook operations and post-hook operations (for deploy
+  strategies)
 
-* Or... built-in deployment strategies, rolling, blue-green, red-black, canary deployment?
+* Or built-in deployment strategies, rolling, blue-green, red-black, canary
+  deployment?
 
-* Scripts are not OS agnostic. Ie, apt vs yum etc. But I'm ok with that. The OS
-  agnostic abstraction can be pretty leaky anyway.
+* Scripts are not OS agnostic. Ie, apt vs yum etc. But the OS agnostic
+  abstraction can be pretty leaky.
 
 * Only does IP addresses at the moment (doesn't resolve hostnames)
 
@@ -81,13 +87,12 @@ Or *exit 1* if you want the *server-todo* sibling to *always* execute.
   return the IP address to the main randle process in some fashion, so that the
   new server can be provisioned (for eg red-black deploys)
 
-* Add support for privilege escalation (sudo etc - although maybe that's
-  outside scope)
+* Add support for privilege escalation, and ssh keys for auth
 
 
 ### Dependencies
 
-* Python 2.7.9
+* Python 2.7.9 (it may Just Work on other versions too)
 
 * Python Paramiko (I'm using python-paramiko/stable,now 1.15.1-1 on debian:jessie)
 
