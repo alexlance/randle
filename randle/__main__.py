@@ -14,7 +14,7 @@ from randle.server import Server
 def get_options():
     """ Setup the command line arguments. """
     parser = argparse.ArgumentParser(description='')
-    parser.add_argument('PATH_TO_DEPLOY', type=str, nargs='?', default=".",
+    parser.add_argument('DIR', type=str, nargs='?', default=".",
                         help='The directory containing server-todo and server-done folders (default: pwd)')
     parser.add_argument('-a', dest='ipaddr', action='append', required=True,
                         help='Server to be provisioned (flag can be used multiple times)')
@@ -62,16 +62,16 @@ def provision_server(p, server, options, auth):
     elif s.conn_status == s.CONN_FAILED:
         p.die(' {} {:16s} Authentication failed'.format(p.red('*'), s.host))
 
-    tasks = sorted(os.listdir(os.path.join(options.PATH_TO_DEPLOY, 'server-todo')))
+    tasks = sorted(os.listdir(os.path.join(options.DIR, 'server-todo')))
     for t in tasks:
-        done_good, done_output, done_errors = s.execute_task(os.path.join(options.PATH_TO_DEPLOY, 'server-done', t))
+        done_good, done_output, done_errors = s.execute_task(os.path.join(options.DIR, 'server-done', t))
         if done_good and not options.force:
             p.warn('   {:16s} {:30s} {}'.format(s.host, t, p.orange('skipped')))
             if options.verbose:
                 p.msg(' {} {:16s} {:30s} verbose done: {}'.format(p.orange('*'), s.host, t, str(done_output).rstrip()))
 
         else:
-            todo_good, todo_output, todo_errors = s.execute_task(os.path.join(options.PATH_TO_DEPLOY, 'server-todo', t))
+            todo_good, todo_output, todo_errors = s.execute_task(os.path.join(options.DIR, 'server-todo', t))
             if todo_good:
                 p.msg('   {:16s} {:30s} {}'.format(s.host, t, p.green('done')))
             else:
@@ -81,10 +81,10 @@ def provision_server(p, server, options, auth):
                 p.msg(' {} {:16s} {:30s} verbose todo: {}'.format(p.orange('*'), s.host, t, str(todo_output).rstrip()))
 
             if options.check:
-                done_good2, done_output2, done_errors2 = s.execute_task(os.path.join(options.PATH_TO_DEPLOY, 'server-done', t))
+                done_good2, done_output2, done_errors2 = s.execute_task(os.path.join(options.DIR, 'server-done', t))
                 if not done_good2:
                     p.warn('   {:16s} {:30s} warning: {} does not indicate success.'
-                           .format(s.host, t, os.path.join(options.PATH_TO_DEPLOY, 'server-done', t)))
+                           .format(s.host, t, os.path.join(options.DIR, 'server-done', t)))
                 if options.verbose:
                     p.msg(' {} {:16s} {:30s} verbose check: {}'.format(p.orange('*'), s.host, t, str(done_output2).rstrip()))
 
@@ -95,7 +95,7 @@ def main():
     """ Run a bunch of scripts on a bunch of servers. """
     options = get_options()
     p = Message(options.quiet)
-    check_config(p, options.PATH_TO_DEPLOY, options)
+    check_config(p, options.DIR, options)
 
     auth = Auth()
     auth.set_username(options.username)
