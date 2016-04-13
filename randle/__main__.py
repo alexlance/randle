@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 """ randle, server configuration tool """
 
 import argparse
