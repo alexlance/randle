@@ -58,11 +58,12 @@ def provision_server(p, server, options, auth):
     elif s.connection_failed():
         p.die(' {} {:16s} Authentication failed'.format(p.red('*'), s.host))
 
+    stop = 0
     tasks = sorted(os.listdir(os.path.join(options.DIR, 'server-todo')))
     for t in tasks:
         done_good, done_output, done_errors = s.execute_task(os.path.join(options.DIR, 'server-done', t))
         if done_good and not options.force:
-            p.warn('   {:16s} {:30s} {}'.format(s.host, t, p.orange('skipped')))
+            p.warn('   {:16s} {:30s} {}'.format(s.host, t, p.orange('pass')))
             if options.verbose:
                 p.msg(' {} {:16s} {:30s} verbose done: {}'.format(p.orange('*'), s.host, t, str(done_output).rstrip()))
 
@@ -71,10 +72,18 @@ def provision_server(p, server, options, auth):
             if todo_good:
                 p.msg('   {:16s} {:30s} {}'.format(s.host, t, p.green('done')))
             else:
-                p.err('   {:16s} {:30s} {}'.format(s.host, t, p.red('error: '+str(todo_errors).rstrip())))
+                stop = 1
+
+            if todo_errors or todo_output:
+                p.err('   {:16s} {:30s} {}'.format(s.host, t, p.red('error: '+str(todo_errors)+str(todo_output).rstrip())))
 
             if options.verbose:
                 p.msg(' {} {:16s} {:30s} verbose todo: {}'.format(p.orange('*'), s.host, t, str(todo_output).rstrip()))
+
+        if stop:
+            s.disconnect()
+            p.msg(' {} {:16s} Disconnected'.format(p.green('*'), s.host))
+            return
 
     s.disconnect()
 
