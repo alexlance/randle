@@ -2,7 +2,7 @@
 set -e
 
 # setup a quick apache config
-rm -f /etc/apache2/sites-enabled/*
+rm -f /etc/apache2/sites-enabled/* || true
 cat << EOF > /etc/apache2/sites-enabled/000-default.conf
 <VirtualHost *:80>
   # Hello World
