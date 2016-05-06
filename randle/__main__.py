@@ -55,9 +55,9 @@ def provision_server(p, server, options, auth):
     """ Connect to a server and run scripts on it to provision it. """
     s = Server(server, auth)
     s.connect()
-    if s.conn_status == s.CONN_OPEN:
+    if s.connection_open():
         p.msg(' {} {:16s} Connected'.format(p.green('*'), s.host))
-    elif s.conn_status == s.CONN_FAILED:
+    elif s.connection_failed():
         p.die(' {} {:16s} Authentication failed'.format(p.red('*'), s.host))
 
     tasks = sorted(os.listdir(os.path.join(options.DIR, 'server-todo')))

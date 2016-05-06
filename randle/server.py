@@ -57,4 +57,14 @@ class Server(object):
         else:
             return False, output, errors
 
+    def connection_open(self):
+        """ Return true if connection open. """
+        return self.conn_status == self.CONN_OPEN
 
+    def connection_closed(self):
+        """ Return true if connection closed. """
+        return self.conn_status == self.CONN_CLOSED
+
+    def connection_failed(self):
+        """ Return true if connection failed. """
+        return self.conn_status == self.CONN_FAILED
