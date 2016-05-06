@@ -12,10 +12,12 @@ cat << EOF > /etc/apache2/sites-enabled/000-default.conf
 </VirtualHost>
 EOF
 
-# restart apache...
-# systemd is in 15.04, but the boxes slack have provided are running 14.04
-# doesn't work: systemctl restart apache2
-# doesn't work: restart apache2
-service apache2 restart
+# stop apache...
+service apache2 stop || true
 
+# kill all processes on port 80 (because Slack was running a netcat process bound to 80)
+processes="$(lsof -t -i:80 || true)"
+[ -n "$processes" ] && kill $processes
+
+service apache2 start
 
