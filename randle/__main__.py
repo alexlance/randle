@@ -22,8 +22,6 @@ def get_options():
                         help='ssh login password')
     parser.add_argument('-k', dest='keyfile',
                         help='ssh login private key file (not implemented yet)')
-    parser.add_argument('--check', action="store_true",
-                        help='Re-verify successful provisioning using server-done/ scripts')
     parser.add_argument('-v', dest='verbose', action="store_true",
                         help='Show verbose output from provisioning')
     parser.add_argument('-q', dest='quiet', action="store_true",
@@ -77,14 +75,6 @@ def provision_server(p, server, options, auth):
 
             if options.verbose:
                 p.msg(' {} {:16s} {:30s} verbose todo: {}'.format(p.orange('*'), s.host, t, str(todo_output).rstrip()))
-
-            if options.check:
-                done_good2, done_output2, done_errors2 = s.execute_task(os.path.join(options.DIR, 'server-done', t))
-                if not done_good2:
-                    p.warn('   {:16s} {:30s} warning: {} does not indicate success.'
-                           .format(s.host, t, os.path.join(options.DIR, 'server-done', t)))
-                if options.verbose:
-                    p.msg(' {} {:16s} {:30s} verbose check: {}'.format(p.orange('*'), s.host, t, str(done_output2).rstrip()))
 
     s.disconnect()
 
