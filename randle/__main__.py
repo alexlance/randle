@@ -26,8 +26,6 @@ def get_options():
                         help='Show verbose output from provisioning')
     parser.add_argument('-q', dest='quiet', action="store_true",
                         help='Show much less output, only errors')
-    parser.add_argument('-f', dest='force', action="store_true",
-                        help='Force provisioning regardless of what server-done/ says')
     return parser.parse_args()
 
 
@@ -39,7 +37,7 @@ def check_config(p, path, options):
             sys.exit(1)
 
     for f in sorted(os.listdir(os.path.join(path, 'server-todo'))):
-        if not os.path.isfile(os.path.join(path, 'server-done', f)) and not options.force:
+        if not os.path.isfile(os.path.join(path, 'server-done', f)):
             p.err('File not found: {}'.format(os.path.join(path, 'server-done', f)))
             sys.exit(1)
 
@@ -62,7 +60,7 @@ def provision_server(p, server, options, auth):
     tasks = sorted(os.listdir(os.path.join(options.DIR, 'server-todo')))
     for t in tasks:
         done_good, done_output, done_errors = s.execute_task(os.path.join(options.DIR, 'server-done', t))
-        if done_good and not options.force:
+        if done_good:
             p.warn('   {:16s} {:30s} {}'.format(s.host, t, p.orange('pass')))
             if options.verbose:
                 p.msg(' {} {:16s} {:30s} verbose done: {}'.format(p.orange('*'), s.host, t, str(done_output).rstrip()))
