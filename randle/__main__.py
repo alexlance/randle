@@ -41,7 +41,7 @@ def provision_server(p, server, options, auth):
         p.msg('   {:16s} {:30s} {}'.format(s.host, t, 'executing'))
         result, output, errors = s.execute_task(os.path.join(options.directory, t))
 
-        if options.verbose:
+        if options.verbose and output:
             p.msg(' {} {:16s} {:30s} verbose: {}'.format('*', s.host, t, output))
 
         # If script writes to stderr but exits 0, interpret that as a user message
