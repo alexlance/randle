@@ -21,9 +21,9 @@ opens an ssh connection to each server and runs the scripts.
 ### Quick start
 
 A command like this will connect to three servers and provision them with the
-scripts in the *server-todo* directory:
+scripts in the directory you specify:
 
-> python -m randle -u USERNAME -p PASSWORD -a 192.168.1.7 -a 192.168.1.8 -a 192.168.1.9
+> python -m randle -d server-todo/ -u USERNAME -p PASSWORD -a 192.168.1.7 -a 192.168.1.8 -a 192.168.1.9 
 
 And take a quick look at the options:
 
@@ -35,9 +35,9 @@ randle binary in ~/.local/bin/.
 
 ### More info...
 
-The folder *server-todo* contains scripts that execute on the server you are
-provisioning. It is up to you to make your scripts idempotent. Ensure your
-scripts exit with a non-zero status if they fail.
+The -d argument lets you specify a folder that contains provisioning scripts
+that you want to execute on a server. It is up to you to make your scripts
+idempotent. Ensure your scripts exit with a non-zero status if they fail.
 
 > *server-todo/004-update-config.sh*
 > #!/bin/bash
@@ -49,9 +49,8 @@ scripts exit with a non-zero status if they fail.
 >   echo "some config option" > /etc/config.something
 > fi
 
-
-It is strongly recommended that every script be run using *set -e* so that any
-failures anywhere in the script will cause the script to *exit 1* immediately.
+Note that by echoing some info to stderr, this tool interprets that as a
+message that the user should see.
 
 
 ### Ideas for the future

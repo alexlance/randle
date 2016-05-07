@@ -12,8 +12,8 @@ from randle.server import Server
 def get_options():
     """ Setup the command line arguments. """
     parser = argparse.ArgumentParser(description='')
-    parser.add_argument('DIR', type=str, nargs='?', default=".",
-                        help='The directory containing server-todo folder (default: pwd)')
+    parser.add_argument('-d', dest='directory', required=True,
+                        help='The directory containing the provisioning scripts')
     parser.add_argument('-a', dest='ipaddr', action='append', required=True,
                         help='Server to be provisioned (flag can be used multiple times)')
     parser.add_argument('-u', dest='username', required=True,
@@ -39,10 +39,10 @@ def provision_server(p, server, options, auth):
     elif s.connection_failed():
         p.die(' {} {:16s} Authentication failed'.format(p.red('*'), s.host))
 
-    tasks = sorted(os.listdir(os.path.join(options.DIR, 'server-todo')))
+    tasks = sorted(os.listdir(os.path.join(options.directory)))
     for t in tasks:
         p.msg('   {:16s} {:30s} {}'.format(s.host, t, p.orange('executing')))
-        result, output, errors = s.execute_task(os.path.join(options.DIR, 'server-todo', t))
+        result, output, errors = s.execute_task(os.path.join(options.directory, t))
 
         if options.verbose:
             p.msg(' {} {:16s} {:30s} verbose: {}'.format(p.orange('*'), s.host, t, output))
