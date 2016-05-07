@@ -20,8 +20,6 @@ def get_options():
                         help='ssh login username')
     parser.add_argument('-p', dest='password', required=True,
                         help='ssh login password')
-    parser.add_argument('-k', dest='keyfile',
-                        help='ssh login private key file (not implemented yet)')
     parser.add_argument('-v', dest='verbose', action="store_true",
                         help='Show verbose output from provisioning')
     parser.add_argument('-q', dest='quiet', action="store_true",
