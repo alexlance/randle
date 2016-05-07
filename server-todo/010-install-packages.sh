@@ -5,6 +5,7 @@ is_installed() {
 }
 
 purge_and_install() {
+  echo "Installing: $1" > /dev/stderr
   apt-get purge -y $1
   apt-get -o Dpkg::Options::="--force-confmiss" install --reinstall -y $1
 }

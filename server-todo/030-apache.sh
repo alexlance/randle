@@ -9,6 +9,8 @@ pidof apache2 || run=1
 
 # setup a quick apache config and start apache
 if [ "${run}" ]; then
+  echo "Setting up apache" > /dev/stderr
+
   rm -f /etc/apache2/sites-enabled/*
   cat << EOF > /etc/apache2/sites-enabled/000-default.conf
   <VirtualHost *:80>

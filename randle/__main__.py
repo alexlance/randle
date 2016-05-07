@@ -47,8 +47,12 @@ def provision_server(p, server, options, auth):
         if options.verbose:
             p.msg(' {} {:16s} {:30s} verbose: {}'.format(p.orange('*'), s.host, t, output))
 
-        if not result:
-            p.err('   {:16s} {:30s} {}'.format(s.host, t, p.red('error: '+errors)))
+        # If a script writes to stderr but exits 0, the we interpret that as a message to be seen
+        if result and errors:
+            p.err('   {:16s} {:30s} {}'.format(s.host, t, p.orange(errors)))
+
+        elif not result:
+            p.err('   {:16s} {:30s} {}'.format(s.host, t, p.red(errors)))
             s.disconnect()
             p.msg(' {} {:16s} Disconnected'.format(p.green('*'), s.host))
             return

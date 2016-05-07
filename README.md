@@ -45,6 +45,7 @@ scripts exit with a non-zero status if they fail.
 > grep "some config option" /etc/config.something || run=1
 >
 > if [ "${run}" ]; then
+>   echo "Missing the config option! Writing it now..." > /dev/stderr
 >   echo "some config option" > /etc/config.something
 > fi
 

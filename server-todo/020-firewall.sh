@@ -13,6 +13,7 @@ ufw status verbose | grep 'Default: deny (incoming), allow (outgoing), disabled 
 
 # firewall: only allow ports 80 and 22
 if [ "${run}" ]; then
+  echo "Fixing firewall" > /dev/stderr
   yes | ufw reset
   ufw allow ssh/tcp
   ufw allow http/tcp
