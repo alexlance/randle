@@ -15,12 +15,6 @@ class Message(object):
             print str(s)
             sys.stdout.flush()
 
-    def warn(self, s):
-        """ Print a message to the screen (stdout). """
-        if not self.quiet:
-            print str(s)
-            sys.stdout.flush()
-
     def err(self, s):
         """ Print a failure message to the screen (stderr). """
         sys.stderr.write(str(s)+"\n")
