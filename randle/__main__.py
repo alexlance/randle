@@ -39,21 +39,23 @@ def provision_server(p, server, options, auth):
 
     tasks = sorted(os.listdir(os.path.join(options.directory)))
     for t in tasks:
-        p.msg('   {:16s} {:30s} {}'.format(s.host, t, p.orange('executing')))
+        p.msg('   {:16s} {:30s} {}'.format(s.host, t, 'executing'))
         result, output, errors = s.execute_task(os.path.join(options.directory, t))
 
         if options.verbose:
-            p.msg(' {} {:16s} {:30s} verbose: {}'.format(p.orange('*'), s.host, t, output))
+            p.msg(' {} {:16s} {:30s} verbose: {}'.format('*', s.host, t, output))
 
         # If a script writes to stderr but exits 0, the we interpret that as a message to be seen
-        if result and errors:
-            p.err('   {:16s} {:30s} {}'.format(s.host, t, p.orange(errors)))
+        if result and errors and not options.quiet:
+            p.msg('   {:16s} {:30s} {}'.format(s.host, t, p.orange(errors)))
 
+        # If the provisioning script didn't exit 0, then abort
         elif not result:
             p.err('   {:16s} {:30s} {}'.format(s.host, t, p.red(errors)))
             s.disconnect()
             p.msg(' {} {:16s} Disconnected'.format(p.green('*'), s.host))
             return
+
     p.msg(' {} {:16s} Disconnected'.format(p.green('*'), s.host))
     s.disconnect()
 
