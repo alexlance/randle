@@ -39,23 +39,11 @@ class Server(object):
 
     def execute_task(self, filename):
         """ Run a local script on a remote server. """
-        chan = self.ssh.get_transport().open_session()
-        chan.exec_command(open(filename).read())
-        output = ''
-        errors = ''
-        receiving = True
-        while receiving:
-            if chan.recv_ready():
-                output += chan.recv(4096).decode('ascii')
-            if chan.recv_stderr_ready():
-                errors += chan.recv_stderr(4096).decode('ascii')
-            if chan.exit_status_ready():
-                receiving = False
-
-        if chan.recv_exit_status() == 0:
-            return True, output, errors
+        stdin, stdout, stderr = self.ssh.exec_command(open(filename).read())
+        if stdout.channel.recv_exit_status() == 0:
+            return True, stdout.read().strip(), stderr.read().strip()
         else:
-            return False, output, errors
+            return False, stdout.read().strip(), stderr.read().strip()
 
     def connection_open(self):
         """ Return true if connection open. """
