@@ -10,7 +10,7 @@ purge_and_install() {
   apt-get -o Dpkg::Options::="--force-confmiss" install --reinstall -y $1
 }
 
-deps="ufw apache2-mpm-prefork php5 git"
+deps="ufw apache2-mpm-prefork libapache2-mod-php5 git"
 
 for i in $deps; do
   is_installed $i || purge_and_install $i
