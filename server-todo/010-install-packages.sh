@@ -1,9 +1,17 @@
 #!/bin/bash
-set -e
 
-# install packages
-apt-get update
-apt-get purge -y ufw php5 git apache2 apache2-mpm-prefork
-rm -rf /etc/ufw /lib/ufw /etc/apache2 /etc/php5 # it'd be nice if apt-get would purge correctly
-apt-get -o Dpkg::Options::="--force-confmiss" install --reinstall -y ufw php5 git apache2-mpm-prefork
+is_installed() {
+  dpkg-query -Wf'${db:Status-abbrev}' "$1" 2>/dev/null | grep -q '^i'
+}
+
+purge_and_install() {
+  apt-get purge -y $1
+  apt-get -o Dpkg::Options::="--force-confmiss" install --reinstall -y $1
+}
+
+deps="ufw apache2-mpm-prefork php5 git"
+
+for i in $deps; do
+  is_installed $i || purge_and_install $i
+done
 

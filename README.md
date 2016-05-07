@@ -20,9 +20,6 @@ opens an ssh connection to each server and runs the scripts.
 
 ### Quick start
 
-Randle looks for scripts in two directories: *server-todo* and *server-done*.
-The latter contains scripts, that check that the former's scripts have executed.
-
 A command like this will connect to three servers and provision them with the
 scripts in the *server-todo* directory:
 
@@ -38,33 +35,22 @@ randle binary in ~/.local/bin/.
 
 ### More info...
 
-The folders *server-todo* and *server-done*, contain scripts that execute on
-the server you are provisioning. There must be a parity between the files in
-these two directories.
+The folder *server-todo* contains scripts that execute on the server you are
+provisioning. It is up to you to make your scripts idempotent. Ensure your
+scripts exit with a non-zero status if they fail.
 
-*server-todo* contains scripts that actually do tasks on the server, and
-*server-done* should contain scripts to determine if those tasks have been
-done.
-
-This is meant to provide a sort of low-tech idempotency. Ie you can run randle
-multiple times and no harm done. Eg:
-
-> *server-todo/004-update-config.sh* (performs a tasks)
+> *server-todo/004-update-config.sh*
 > #!/bin/bash
-> set -e
-> echo "some config option" > /etc/config.something
+>
+> grep "some config option" /etc/config.something || run=1
+>
+> if [ "${run}" ]; then
+>   echo "some config option" > /etc/config.something
+> fi
 
-> *server-done/004-update-config.sh* (check that the task was performed)
-> #!/bin/bash
-> set -e
-> # grep exits 1 if pattern not found
-> grep "some config option" /etc/config.something 
 
 It is strongly recommended that every script be run using *set -e* so that any
 failures anywhere in the script will cause the script to *exit 1* immediately.
-
-The scripts in *server-done* must *exit 1* if you want the sibling task to
-execute.
 
 
 ### Ideas for the future
