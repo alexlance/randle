@@ -1,7 +1,8 @@
 """ Authentication wrapper for ssh. """
 
+
 class Auth(object):
-    """ This gives us a flexible method of handling ssh auth (as new auth methods are implemented). """
+    """ Flexible method of handling multiple ssh auth methods. """
 
     def __init__(self):
         self.username = ''
@@ -20,13 +21,13 @@ class Auth(object):
         self.auth_type = 'password'
 
     def set_private_key(self, key_file, passphrase):
-        """ Not implemented yet, but this will be how you use a private key. """
+        """ Use a private key for ssh auth. Not implemented yet. """
         self.key_file = key_file
         self.passphrase = passphrase
         self.auth_type = 'private_key'
 
     def to_dict(self):
-        """ Serialize the credentials to a dict for easy handling in the Server class. """
+        """ Serialize credentials to dict for generic handling. """
         if self.auth_type == "password":
             return {'username': self.username, 'password': self.password}
         elif self.auth_type == "private_key":

@@ -3,6 +3,7 @@
 import paramiko
 import time
 
+
 class Server(object):
     """ A class to model our provisioning of one particular server. """
     CONN_CLOSED, CONN_OPEN, CONN_FAILED = 1, 2, 3
@@ -15,7 +16,7 @@ class Server(object):
         self.ssh = None
 
     def connect(self):
-        """ Use the paramiko ssh library to create an ssh connection to a server. """
+        """ Use paramiko module to create an ssh connection to a server. """
         try:
             self.ssh = paramiko.SSHClient()
             self.ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())

@@ -2,6 +2,7 @@
 
 import sys
 
+
 class Message(object):
     """ A class to funnel all user messages through. """
 

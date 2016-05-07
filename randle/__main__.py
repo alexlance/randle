@@ -1,7 +1,6 @@
 """ randle, server configuration tool """
 
 import argparse
-import sys
 import os
 from multiprocessing import Process
 from randle.message import Message
@@ -13,9 +12,9 @@ def get_options():
     """ Setup the command line arguments. """
     parser = argparse.ArgumentParser(description='')
     parser.add_argument('-d', dest='directory', required=True,
-                        help='The directory containing the provisioning scripts')
+                        help='Directory containing the provisioning scripts')
     parser.add_argument('-a', dest='ipaddr', action='append', required=True,
-                        help='Server to be provisioned (flag can be used multiple times)')
+                        help='Server(s) to be provisioned (can be repeated)')
     parser.add_argument('-u', dest='username', required=True,
                         help='ssh login username')
     parser.add_argument('-p', dest='password', required=True,
@@ -45,7 +44,7 @@ def provision_server(p, server, options, auth):
         if options.verbose:
             p.msg(' {} {:16s} {:30s} verbose: {}'.format('*', s.host, t, output))
 
-        # If a script writes to stderr but exits 0, the we interpret that as a message to be seen
+        # If script writes to stderr but exits 0, interpret that as a user message
         if result and errors and not options.quiet:
             p.msg('   {:16s} {:30s} {}'.format(s.host, t, p.orange(errors)))
 
@@ -61,7 +60,7 @@ def provision_server(p, server, options, auth):
 
 
 def main():
-    """ Run a bunch of scripts on a bunch of servers. """
+    """ Run provisioning scripts on a multiple servers simultaneously. """
     options = get_options()
     p = Message(options.quiet)
 
@@ -69,6 +68,7 @@ def main():
     auth.set_username(options.username)
     auth.set_password(options.password)
 
+    # provision multiple servers in parallel
     processes = []
     for server in options.ipaddr:
         proc = Process(target=provision_server, args=(p, server, options, auth))
