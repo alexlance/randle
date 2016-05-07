@@ -33,9 +33,9 @@ def provision_server(p, server, options, auth):
     s.connect()
 
     if s.connection_open():
-        p.msg(' {} {:16s} Connected'.format(p.green('*'), s.host))
+        p.msg(' * {:16s} Connected'.format(s.host))
     elif s.connection_failed():
-        p.die(' {} {:16s} Authentication failed'.format(p.red('*'), s.host))
+        p.die(' * {:16s} Authentication failed'.format(s.host))
 
     tasks = sorted(os.listdir(os.path.join(options.directory)))
     for t in tasks:
@@ -43,27 +43,27 @@ def provision_server(p, server, options, auth):
         result, output, errors = s.execute_task(os.path.join(options.directory, t))
 
         if options.verbose and output:
-            p.msg(' {} {:16s} {:30s} verbose: {}'.format('*', s.host, t, output))
+            p.dbg(' * {:16s} {:30s} verbose: {}'.format(s.host, t, output))
 
         # If script writes to stderr but exits 0, interpret that as a user message
         if result and errors and not options.quiet:
-            p.msg('   {:16s} {:30s} {}'.format(s.host, t, p.orange(errors)))
+            p.msg('   {:16s} {:30s} {}'.format(s.host, t, errors))
 
         # If the provisioning script didn't exit 0, then abort
         elif not result:
-            p.err('   {:16s} {:30s} {}'.format(s.host, t, p.red(errors)))
+            p.err('   {:16s} {:30s} {}'.format(s.host, t, errors))
             s.disconnect()
-            p.msg(' {} {:16s} Disconnected'.format(p.green('*'), s.host))
+            p.msg(' * {:16s} Disconnected'.format(s.host))
             return
 
-    p.msg(' {} {:16s} Disconnected'.format(p.green('*'), s.host))
+    p.msg(' * {:16s} Disconnected'.format(s.host))
     s.disconnect()
 
 
 def main():
     """ Run provisioning scripts on a multiple servers simultaneously. """
     options = get_options()
-    p = Message(options.quiet)
+    p = Message(options.quiet, options.verbose)
 
     auth = Auth()
     auth.set_username(options.username)

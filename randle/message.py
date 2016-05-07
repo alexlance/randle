@@ -18,7 +18,7 @@ class Message(object):
 
     def err(self, s):
         """ Print a failure message to the screen (stderr). """
-        sys.stderr.write(str(s)+"\n")
+        sys.stderr.write(self._red(str(s)+"\n"))
 
     def die(self, s):
         """ Print a failure message to the screen (stderr) and then halt. """
@@ -28,17 +28,17 @@ class Message(object):
     def dbg(self, s):
         """ Print a message to the screen (stdout) for debugging only. """
         if self.debug:
-            print "DBG " + str(s)
+            print self._orange(str(s))
             sys.stdout.flush()
 
-    def green(self, s):
+    def _green(self, s):
         """ Change text colour - should find more generic method. """
         return '\033[92m{}\033[0m'.format(s)
 
-    def orange(self, s):
+    def _orange(self, s):
         """ Change text colour - should find more generic method. """
         return '\033[93m{}\033[0m'.format(s)
 
-    def red(self, s):
+    def _red(self, s):
         """ Change text colour - should find more generic method. """
         return '\033[91m{}\033[0m'.format(s)
