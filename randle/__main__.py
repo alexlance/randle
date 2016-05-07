@@ -10,19 +10,20 @@ from randle.server import Server
 
 def get_options():
     """ Setup the command line arguments. """
-    parser = argparse.ArgumentParser(description='')
+    parser = argparse.ArgumentParser(prog='randle', description='Provision servers \
+                                     using a directory containing shell scripts')
     parser.add_argument('-d', dest='directory', required=True,
-                        help='Directory containing the provisioning scripts')
+                        help='directory containing the provisioning scripts')
     parser.add_argument('-a', dest='ipaddr', action='append', required=True,
-                        help='Server(s) to be provisioned (can be repeated)')
+                        help='servers to be provisioned (use -a multiple times)')
     parser.add_argument('-u', dest='username', required=True,
-                        help='ssh login username')
+                        help='ssh username')
     parser.add_argument('-p', dest='password', required=True,
-                        help='ssh login password')
+                        help='ssh password')
     parser.add_argument('-v', dest='verbose', action="store_true",
-                        help='Show verbose output from provisioning')
+                        help='show verbose output from provisioning')
     parser.add_argument('-q', dest='quiet', action="store_true",
-                        help='Show much less output, only errors')
+                        help='show much less output, only errors')
     return parser.parse_args()
 
 
