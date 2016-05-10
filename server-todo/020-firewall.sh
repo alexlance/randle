@@ -1,6 +1,8 @@
 #!/bin/bash
+#
+# Check that the firewall has been setup correctly, if not then use
+# uncomplicated firewall to setup the firewall rules.
 
-# check that the firewall has been setup correctly
 ufw status verbose | grep -E 'Status: active'      || run=1
 ufw status verbose | grep -E '22.*ALLOW.*Anywhere' || run=1
 ufw status verbose | grep -E '80.*ALLOW.*Anywhere' || run=1

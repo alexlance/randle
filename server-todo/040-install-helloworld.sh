@@ -1,6 +1,9 @@
 #!/bin/bash
+#
+# Test that the helloworld app got deployed correctly into apache's document
+# root and that the application is being served correctly. If not, git clone it
+# into the web root.
 
-# test that the helloworld app got deployed correctly
 grep -i hello /var/www/html/index.php || run=1
 
 # check that the webserver is serving out the app

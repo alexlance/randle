@@ -1,6 +1,9 @@
 #!/bin/bash
+#
+# Ensure apache is configured to serve our nominated document root, and that
+# apache is running and any existing processes that are occupying port 80 are
+# killed.
 
-# ensure our new default.conf got placed in
 grep '# Hello World' /etc/apache2/sites-enabled/000-default.conf || run=1
 
 # check apache is running

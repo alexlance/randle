@@ -1,9 +1,11 @@
 #!/bin/bash
+#
+# Check that there's more than 20mb of diskspace free on the root filesystem.
+# If not, print an error to /dev/stderr and exit 1.
 
-# probably going to be issues if there's less than 20mb free on the root filesystem
-[ "$(df --output=avail / | grep -vi avail)" -gt 20000 ]
+[ "$(df --output=avail / | tail -n +2)" -gt 20000 ] || run=1
 
-if [ "$?" -ne 0 ]; then
+if [ "${run}" ]; then
   echo "Not enough diskspace. Exiting." > /dev/stderr
   exit 1
 fi

@@ -1,4 +1,7 @@
 #!/bin/bash
+#
+# Check that a list of packages is installed. If the package isn't installed
+# then purge and reinstall - including config files (--force-confmiss).
 
 is_installed() {
   dpkg-query -Wf'${db:Status-abbrev}' "$1" 2>/dev/null | grep -q '^i'
