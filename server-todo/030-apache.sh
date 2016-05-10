@@ -32,4 +32,11 @@ EOF
   [ -n "$processes" ] && kill $processes
 
   service apache2 start
+
+  # ensure it started
+  pidof apache2
+  if [ "$?" -ne 0 ]; then
+    echo "apache failed to start" > /dev/stderr
+    exit 1
+  fi
 fi
