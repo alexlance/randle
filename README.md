@@ -8,6 +8,9 @@
 Given a pool of servers, and a bunch of provisioning shell scripts, randle
 opens an ssh connection to each server and runs the scripts.
 
+This application was written as a challenge for a job interview with Slack.com,
+but since I worked quite hard on it, I thought it might be of interest to others.
+
 
 ### Features
 
@@ -23,11 +26,11 @@ opens an ssh connection to each server and runs the scripts.
 A command like this will connect to three servers and provision them with the
 scripts in the directory you specify:
 
-> python -m randle -d server-todo/ -u USERNAME -p PASSWORD -a 192.168.1.7 -a 192.168.1.8 -a 192.168.1.9 
+    python -m randle -d server-todo/ -u USERNAME -p PASSWORD -a 192.168.1.7 -a 192.168.1.8 -a 192.168.1.9 
 
 And take a quick look at the options:
 
-> python -m randle --help
+    python -m randle --help
 
 Note: if you run *python setup.py install --user* it will build a standalone
 randle binary in ~/.local/bin/.
@@ -40,14 +43,15 @@ that you want to execute on a server. It is up to you to make your scripts
 idempotent. Ensure your scripts exit with a non-zero status if they fail.
 
 > *server-todo/004-update-config.sh*
-> #!/bin/bash
->
-> grep "some config option" /etc/config.something || run=1
->
-> if [ "${run}" ]; then
->   echo "Missing the config option! Writing it now..." > /dev/stderr
->   echo "some config option" > /etc/config.something
-> fi
+
+    #!/bin/bash
+
+    grep "some config option" /etc/config.something || run=1
+
+    if [ "${run}" ]; then
+      echo "Missing the config option! Writing it now..." > /dev/stderr
+      echo "some config option" > /etc/config.something
+    fi
 
 Note that by echoing some info to stderr, this tool interprets that as a
 message that the user should see.
